@@ -1,166 +1,213 @@
-# 📚 Text-to-SQL Agent: Natural Language Database Query System
+# Text-to-SQL Agent
+## Natural Language Interface for Relational Databases
 
-**Text-to-SQL LangGraph Agent is an open-source AI workflow that transforms natural language questions into SQL queries and insightful answers—powered locally by Ollama and Open Source LLM's, without relying on function calling.**
+The Text-to-SQL LangGraph Agent is an open-source AI workflow that converts natural-language questions into SQL queries and understandable answers. It runs locally through Ollama and open-source language models, without depending on function calling.
 
-## 🎯 Project Description
+## Overview
 
-This project demonstrates an intelligent Text-to-SQL Agent that transforms natural language questions into executable SQL queries and returns human-readable results. Built to bridge the gap between business users and database systems, it enables anyone to query databases using plain English without SQL knowledge.
+This project makes relational databases accessible to users who may not know SQL. A user can ask a question in plain English—for example, “How many customers are from the USA?”—and the system generates the corresponding SQL statement, executes it against the database, and returns both the query results and a conversational explanation.
 
-The system processes questions like "How many customers are from the USA?" and automatically generates the corresponding SQL query, executes it against the database, and provides both technical results and conversational explanations.
+There are two implementations:
 
-It is implemented in two ways:
+1. **LangChain notebook:** `text_to_SQL_Langchain_agent.ipynb` uses LangChain’s built-in SQL agent.
+2. **Custom LangGraph workflow:** A sequence of nodes and custom tools provides deterministic SQL generation and execution.
 
-  1. Jupyter Notebook (text_to_SQL_Langchain_agent.ipynb) — utilizes LangChain’s built-in SQL agent.
+## System Design
 
-  2. Custom LangGraph Workflow — uses sequential nodes and custom tools for deterministic SQL generation and execution.
+The application uses a modular, stateful design built around LangGraph, Ollama, and SQLite.
 
+### Agent orchestration
 
-### 🏗️ Technical Architecture
+- Conversation state is managed through `MessagesState`.
+- The LangGraph workflow contains five sequential nodes and deterministic routing from `START` to `END`.
+- Custom `@tool` decorators connect the agent to database operations.
 
-The system follows a modular, stateful architecture combining **LangGraph**, **Ollama**, and **SQLite** for controlled Text-to-SQL generation.
+### Language model configuration
 
-#### LangGraph Agent Pipeline
-- Manages conversation flow using **MessagesState**
-- Executes **5 sequential nodes** with deterministic routing (`START → END`)
-- Integrates **custom @tool decorators** for database operations
+| Component | Configuration |
+|---|---|
+| Model | CodeGemma 7B Instruct (Q4_K_S), configurable |
+| Inference runtime | Ollama at `http://localhost:11434` |
+| Prompt context | Structured prompts with schema injection and response formatting |
 
-#### LLM Integration
-- **Model:** CodeGemma 7B Instruct (Q4_K_S) - Configurable
-- **Inference Engine:** Ollama (`http://localhost:11434`)
-- **Context Handling:** Structured prompts with schema injection and response formatting
+### Database configuration
 
-#### Database Layer
-- **Engine:** SQLite using LangChain’s `SQLDatabase` abstraction
-- **Schema:** Chinook music database with 11 tables - Configurable
-- **Safety:** Read-only operations enforced with query validation
+| Component | Configuration |
+|---|---|
+| Database engine | SQLite |
+| Database interface | LangChain `SQLDatabase` abstraction |
+| Example schema | Chinook music database containing 11 tables, configurable |
+| Query safeguards | Read-only operations enforced through query validation |
 
+## Capabilities
 
+### Natural-language querying
+The agent translates questions into SQL, accounts for table relationships, and supports queries involving multiple-table joins.
 
-### ✨ Key Features
+### Multiple ways to interact
+The project can be used through:
+- A Streamlit web application for interactive use.
+- FastAPI REST endpoints for integration with other systems.
+- A Jupyter Notebook for development and experimentation.
 
-- **🧠 Intelligent Query Processing**: Converts natural language questions into accurate SQL queries, understands table relationships, and handles complex multi-table joins.  
-- **🔄 Multiple Interfaces**: Accessible via Streamlit web app (interactive dashboard), FastAPI REST endpoints (for integrations), and Jupyter Notebook (for development and experimentation).  
-- **🛡️ Production-Ready Safety**: Ensures read-only database operations, robust error handling, query validation, and automatic result limiting to prevent misuse or overload.  
-- **📊 Rich Output Formats**: Returns structured responses including generated SQL queries, raw database results, and natural-language explanations for better interpretability.  
+### Query safeguards and error handling
+Database operations are restricted to read-only access. The workflow includes query validation, error handling, and automatic result limits to reduce misuse and prevent excessive queries.
 
+### Explanatory results
+Responses include the generated SQL statement, the raw database output, and a natural-language explanation to make the results easier to interpret.
 
-## 📁 Project Structure
-```
-📦 langgraph-text-to-sql-agent
-│
-├── configuration.py        # Environment setup and configurations
-├── FastAPI.py              # API layer for backend integration
-├── langgraphagent.py       # Core LangGraph workflow and agent logic
-├── streamlitapp.py         # Streamlit frontend for user interaction
-├── text_to_SQL_Langchain_agent.ipynb   # Jupyter notebook (LangChain agent version)
-└── README.md
+## Repository Layout
+
+```text
+langgraph-text-to-sql-agent/
+├── configuration.py
+├── FastAPI.py
+├── langgraphagent.py
+├── streamlitapp.py
+├── text_to_SQL_Langchain_agent.ipynb
+├── README.md
 └── License
-
 ```
 
-### 💡 Use Cases
+- `configuration.py` — environment setup and configuration.
+- `FastAPI.py` — API layer for backend integration.
+- `langgraphagent.py` — core LangGraph workflow and agent logic.
+- `streamlitapp.py` — Streamlit frontend for user interaction.
+- `text_to_SQL_Langchain_agent.ipynb` — notebook implementation using the LangChain agent.
 
-- **Data Exploration**: Ask natural language questions to explore relational data without writing SQL.  
-- **Business Intelligence**: Generate quick insights from structured databases for decision-making.  
-- **Developer Tools**: Integrate the FastAPI endpoint into analytics dashboards or internal data systems.  
-- **Education & Training**: Teach SQL concepts interactively by showing natural language to SQL conversions.  
-- **AI Agents Integration**: Use as a backend for chatbots or virtual assistants requiring database access.  
+## Example Applications
 
+| Use case | How the project can be used |
+|---|---|
+| Data exploration | Explore relational data by asking questions without writing SQL. |
+| Business intelligence | Obtain quick insights from structured databases to support decisions. |
+| Developer integrations | Connect the FastAPI endpoint to analytics dashboards or internal data systems. |
+| Education and training | Demonstrate the conversion of natural-language questions into SQL. |
+| AI agent integrations | Provide database access to chatbots and virtual assistants. |
 
----
+## Demo
 
-## 🧭 Demo Sample Images
+### Streamlit interface
 
-**Streamlit Interface**
+<img width="1915" height="1080" alt="Streamlit interface" src="https://github.com/user-attachments/assets/93324b05-b375-4cff-a76f-c6a2cf9a2175" />
 
-<img width="1915" height="1080" alt="Image" src="https://github.com/user-attachments/assets/93324b05-b375-4cff-a76f-c6a2cf9a2175" />
+### FastAPI response
 
-**FastAPI Response**
+<img width="1718" height="878" alt="FastAPI response" src="https://github.com/user-attachments/assets/2a500b25-98ee-4743-baed-c7a76f5c35d1" />
 
-<img width="1718" height="878" alt="Image" src="https://github.com/user-attachments/assets/2a500b25-98ee-4743-baed-c7a76f5c35d1" />
+## Installation and Configuration
 
----
+### Requirements
 
-## 🛠️ Installation Instructions
+- Python 3.10 or later.
+- A CUDA-compatible GPU is optional and can improve processing speed.
+- 8 GB or more of RAM is recommended.
 
-### Prerequisites
-- Python 3.10+
-- CUDA-compatible GPU (optional, for faster processing)
-- 8GB+ RAM recommended
+### 1. Get the repository
 
-### Step 1: Clone Repository
 ```bash
 git clone https://github.com/adhmara-prani/Text-2-SQL-agent.git
 cd langgraph-text-to-sql-agent
 ```
 
-### Step 2: Install Dependencies
+### 2. Install Python dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
+### 3. Install and prepare Ollama
 
-### Step 3: Set Up Ollama (LLM Backend)
+Install Ollama:
+
 ```bash
-# Install Ollama
 curl -fsSL https://ollama.ai/install.sh | sh
+```
 
-# Pull the required model
+Download the model used by the agent:
+
+```bash
 ollama pull codegemma:7b-instruct-v1.1-q4_K_S
 ```
 
-### Step 4: Configure Paths
-Update the paths in `configuration.py` to match your system:
+### 4. Set the local configuration
+
+In `configuration.py`, update the model and database paths to match your environment:
+
 ```python
 model_name = "codegemma:7b-instruct-v1.1-q4_K_S"
 database_name = "sqlite:///Chinook.db"
 ```
 
-## 📖 Usage
+## Running the Application
 
-### Starting the Application
+### Start the API
 
-1. **Start the FastAPI Server**:
+Run the FastAPI server:
+
 ```bash
 python FastAPI.py
 ```
-The API will be available at `http://localhost:8000`
 
-2. **Launch the Streamlit Interface**:
+Once started, the API is available at:
+
+`http://localhost:8000`
+
+### Open the web interface
+
+In a separate terminal, launch Streamlit:
+
 ```bash
 streamlit run streamlit_app.py
 ```
-The web interface will open at `http://localhost:8501`
 
-### ⚙️ Basic Workflow
+The interface will be available at:
 
+`http://localhost:8501`
 
-1. **User Input** → The user asks a natural language question (e.g., *“How many customers are from the USA?”*).  
-2. **List Tables** → The system retrieves available table names from the SQLite database.  
-3. **Get Schema** → The schema for relevant tables is extracted to provide context to the LLM.  
-4. **Generate SQL** → The LLM (CodeGemma 7B via Ollama) creates a syntactically correct SQL query.  
-5. **Run Query** → The SQL query is safely executed with validation and read-only enforcement.  
-6. **Generate Response** → The system returns a structured output including:  
-   - The generated SQL query  
-   - Raw database results  
-   - A natural language explanation of the findings  
+## Request Lifecycle
 
-**Workflow Graph:**  
- 
-START → list_tables → get_schema → generate_sql → run_query → generate_response → END
+A typical request moves through the following stages:
 
----
+1. **Question submission:** The user enters a natural-language question, such as “How many customers are from the USA?”
+2. **Table discovery:** The application retrieves the available table names from the SQLite database.
+3. **Schema retrieval:** The schema for the relevant tables is collected and supplied as context to the language model.
+4. **SQL generation:** CodeGemma 7B, running through Ollama, generates the SQL query.
+5. **Query execution:** The query is validated and executed under read-only restrictions.
+6. **Response construction:** The application returns the generated SQL, raw database results, and a natural-language explanation of the findings.
 
-### 🧱 Technologies Used
+The LangGraph workflow follows this sequence:
 
+```text
+START
+  |
+  v
+list_tables
+  |
+  v
+get_schema
+  |
+  v
+generate_sql
+  |
+  v
+run_query
+  |
+  v
+generate_response
+  |
+  v
+END
+```
 
+## Technology Stack
 
-| Technology | Description | Link |
-|------------|-------------|------|
-| **LangChain** | Framework for building LLM-driven applications | [LangChain](https://python.langchain.com) |
-| **LangGraph** | Node-based agent orchestration for LLM workflows | [LangGraph](https://github.com/langchain-ai/langgraph) |
-| **Ollama** | Local LLM inference engine | [Ollama](https://ollama.ai) |
-| **CodeGemma 7B (Q4_K_S)** | Quantized instruction-tuned model for code understanding | [Gemma Models](https://ai.google.dev/gemma) |
-| **SQLite** | Lightweight relational database for structured data | [SQLite](https://sqlite.org) |
-| **FastAPI** | High-performance API framework for Python | [FastAPI](https://fastapi.tiangolo.com) |
-| **Streamlit** | Web framework for building interactive data apps | [Streamlit](https://streamlit.io) |
+| Technology | Role in the project | Documentation |
+|---|---|---|
+| LangChain | Framework for building LLM-driven applications | [LangChain](https://python.langchain.com) |
+| LangGraph | Node-based orchestration for LLM workflows | [LangGraph](https://github.com/langchain-ai/langgraph) |
+| Ollama | Local language-model inference engine | [Ollama](https://ollama.ai) |
+| CodeGemma 7B (Q4_K_S) | Quantized, instruction-tuned model for code understanding | [Gemma Models](https://ai.google.dev/gemma) |
+| SQLite | Lightweight relational database for structured data | [SQLite](https://sqlite.org) |
+| FastAPI | Python framework for building high-performance APIs | [FastAPI](https://fastapi.tiangolo.com) |
+| Streamlit | Framework for interactive data applications | [Streamlit](https://streamlit.io) |
