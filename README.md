@@ -90,7 +90,7 @@ The system follows a modular, stateful architecture combining **LangGraph**, **O
 
 ### Step 1: Clone Repository
 ```bash
-git clone https://github.com/Ginga1402/langgraph-text-to-sql-agent.git
+git clone https://github.com/adhmara-prani/Text-2-SQL-agent.git
 cd langgraph-text-to-sql-agent
 ```
 
